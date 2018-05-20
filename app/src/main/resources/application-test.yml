@@ -1,0 +1,13 @@
+spring:
+  profiles: test
+  datasource:
+      driverClassName: org.h2.Driver
+      url: jdbc:h2:mem:testdb
+      username: ${DATABASE_USER}
+  liquibase:
+    url: ${spring.datasource.url}
+    change-log: "classpath:/db/changelog/changesets.xml"
+    enabled: true
+    user: sa
+    password:
+    drop-first: true

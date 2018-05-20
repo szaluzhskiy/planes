@@ -1,0 +1,23 @@
+server:
+    port: ${PORT:9000}
+spring:
+  application:
+      name: planes
+      date: '@build.date@'
+      version: '@build.version@'
+  profiles.active: local
+  messages.encoding: UTF-8
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+      FAIL_ON_EMPTY_BEANS: false
+    default-property-inclusion: non_null
+    date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
+
+liquibase:
+    enabled: true
+    change-log: classpath:master.xml
+logging:
+    config: classpath:logback.xml
+
+

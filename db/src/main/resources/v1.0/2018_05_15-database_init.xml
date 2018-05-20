@@ -1,0 +1,30 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="2018-05-15_1" author="stasz">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="syllabus"/>
+            </not>
+        </preConditions>
+        <createTable tableName="syllabus">
+            <column name="uuid" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="route_name" type="VARCHAR(2)"/>
+            <column name="airport_a" type="VARCHAR(3)"/>
+            <column name="airport_b" type="VARCHAR(3)"/>
+            <column name="day_of_week" type="VARCHAR(12)"/>
+            <column name="plane_name" type="VARCHAR(24)"/>
+        </createTable>
+        <addPrimaryKey columnNames="uuid"
+                       constraintName="pk_syllabus"
+                       schemaName="public"
+                       tableName="syllabus"/>
+    </changeSet>
+
+
+</databaseChangeLog>

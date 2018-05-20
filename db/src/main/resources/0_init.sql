@@ -1,0 +1,21 @@
+CREATE DATABASE postgres WITH OWNER = postgres ENCODING = 'UTF8';
+
+CONNECT TO postgres USING postgres;
+
+-- schema owner
+CREATE USER plane WITH password 'plane';
+
+-- schema user
+CREATE USER plane_ms WITH password 'plane_ms';
+
+-- create schema
+CREATE SCHEMA planes AUTHORIZATION plane;
+
+GRANT USAGE ON SCHEMA planes TO plane_ms;
+
+ALTER DEFAULT PRIVILEGES FOR USER plane IN SCHEMA planes GRANT SELECT,INSERT,UPDATE,DELETE,TRUNCATE ON TABLES TO plane;
+ALTER DEFAULT PRIVILEGES FOR USER plane IN SCHEMA planes GRANT USAGE ON SEQUENCES TO plane;
+ALTER DEFAULT PRIVILEGES FOR USER plane IN SCHEMA planes GRANT EXECUTE ON FUNCTIONS TO plane;
+ALTER DEFAULT PRIVILEGES FOR USER plane IN SCHEMA planes GRANT CREATE ON FUNCTIONS TO plane;
+
+alter user plane_ms set search_path = 'plane';

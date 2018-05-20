@@ -1,0 +1,83 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="2018-05-15_plane_report_function" author="stasz">
+        <createProcedure dbms="postgresql"
+                         encoding="utf8" procedureName="CALC_LANDING_NUMBER_BY_PERIOD()"
+                         relativeToChangelogFile="true" schemaName="planes">
+                CREATE OR REPLACE FUNCTION planes.CALC_LANDING_NUMBER_BY_PERIOD (
+                startdate date,
+                enddate date,
+                airportname varchar
+                )
+                RETURNS TABLE (
+                airport varchar,
+                plane varchar,
+                numOfLandings numeric
+                ) AS
+                $body$
+                DECLARE
+                n_sundays integer;
+                n_mondays integer;
+                n_tuesdays integer;
+                n_wendesdays integer;
+                n_thursdays integer;
+                n_fridays integer;
+                n_saturdays integer;
+                BEGIN
+                n_sundays := (SELECT COUNT(*) FROM generate_series(startdate::date, enddate::date, '1 day') AS g(mydate) WHERE EXTRACT(DOW FROM mydate) = 0);
+                n_mondays := (SELECT COUNT(*) FROM generate_series(startdate::date, enddate::date, '1 day') AS g(mydate) WHERE EXTRACT(DOW FROM mydate) = 1);
+                n_tuesdays := (SELECT COUNT(*) FROM generate_series(startdate::date, enddate::date, '1 day') AS g(mydate) WHERE EXTRACT(DOW FROM mydate) = 2);
+                n_wendesdays := (SELECT COUNT(*) FROM generate_series(startdate::date, enddate::date, '1 day') AS g(mydate) WHERE EXTRACT(DOW FROM mydate) = 3);
+                n_thursdays := (SELECT COUNT(*) FROM generate_series(startdate::date, enddate::date, '1 day') AS g(mydate) WHERE EXTRACT(DOW FROM mydate) = 4);
+                n_fridays := (SELECT COUNT(*) FROM generate_series(startdate::date, enddate::date, '1 day') AS g(mydate) WHERE EXTRACT(DOW FROM mydate) = 5);
+                n_saturdays := (SELECT COUNT(*) FROM generate_series(startdate::date, enddate::date, '1 day') AS g(mydate) WHERE EXTRACT(DOW FROM mydate) = 6);
+
+                RETURN QUERY
+                SELECT
+                s.destination_airport as airport,
+                s.plane_name as plane,
+                sum(s.num_of_fights) as numOfLandings
+                FROM
+                (
+                SELECT
+                    sb.plane_name,
+                    sb.airport_b as destination_airport,
+                    sb.day_of_week,
+                    CASE
+                        WHEN (sb.day_of_week = 'MONDAY') THEN count(1) * n_mondays
+                        WHEN (sb.day_of_week = 'TUESDAY') THEN count(1) * n_tuesdays
+                        WHEN (sb.day_of_week = 'WEDNESDAY') THEN count(1) * n_wendesdays
+                        WHEN (sb.day_of_week = 'THURSDAY') THEN count(1) * n_thursdays
+                        WHEN (sb.day_of_week = 'FRIDAY') THEN count(1) * n_fridays
+                        WHEN (sb.day_of_week = 'SATURDAY') THEN count(1) * n_saturdays
+                        WHEN (sb.day_of_week = 'SUNDAY') THEN count(1) * n_sundays
+                        END AS num_of_fights
+                    FROM
+                        planes.syllabus AS sb
+                    WHERE
+                        sb.airport_b = airportname
+                    GROUP BY
+                        sb.plane_name,
+                        sb.airport_b,
+                        sb.day_of_week
+                )  s
+                WHERE
+                    s.num_of_fights > 0
+                GROUP BY
+                    s.destination_airport,
+                    s.plane_name
+                ;
+                END;
+                $body$
+                LANGUAGE 'plpgsql'
+                VOLATILE
+                CALLED ON NULL INPUT
+                SECURITY INVOKER
+                COST 100 ROWS 1000;
+        </createProcedure>
+    </changeSet>
+</databaseChangeLog>

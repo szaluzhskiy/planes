@@ -1,0 +1,11 @@
+<databaseChangeLog
+     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <include file="2018_05_15-database_init.xml" relativeToChangelogFile="true"/>
+    <include file="2018_05_15-data_insert.xml" relativeToChangelogFile="true"/>
+    <include file="2018_05_15-plane_report_function.xml" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>
